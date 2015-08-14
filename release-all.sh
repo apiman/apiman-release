@@ -8,25 +8,6 @@ echo ""
 echo ""
 
 echo "---------------------------------------------------"
-echo " Resetting 'target' directory."
-echo "---------------------------------------------------"
-echo ""
-rm -rf target
-mkdir target
-
-echo "---------------------------------------------------"
-echo " Checking out required apiman git repos."
-echo "---------------------------------------------------"
-echo ""
-mkdir target/git-repos
-cd target/git-repos
-git clone git@github.com:apiman/apiman-quickstarts.git
-git clone git@github.com:apiman/apiman.git
-git clone git@github.com:apiman/apiman-plugins.git
-git clone git@github.com:apiman/apiman-manager-ui.git
-git clone git@github.com:apiman/apiman-guides.git
-
-echo "---------------------------------------------------"
 echo " Tell me what version we're releasing!"
 echo "---------------------------------------------------"
 echo ""
@@ -50,6 +31,26 @@ echo "Dev Version: $DEV_VERSION"
 echo "######################################"
 echo ""
 
+
+
+echo "---------------------------------------------------"
+echo " Resetting 'target' directory."
+echo "---------------------------------------------------"
+echo ""
+rm -rf target
+mkdir target
+
+echo "---------------------------------------------------"
+echo " Checking out required apiman git repos."
+echo "---------------------------------------------------"
+echo ""
+mkdir target/git-repos
+cd target/git-repos
+git clone git@github.com:apiman/apiman-quickstarts.git
+git clone git@github.com:apiman/apiman.git
+git clone git@github.com:apiman/apiman-plugins.git
+git clone git@github.com:apiman/apiman-manager-ui.git
+git clone git@github.com:apiman/apiman-guides.git
 
 
 
