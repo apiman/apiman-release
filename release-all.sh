@@ -57,6 +57,7 @@ echo ""
 echo "---------------------------------------------------"
 echo " Release apiman-quickstarts"
 echo "---------------------------------------------------"
+pushd .
 echo cd apiman-quickstarts
 echo ./release.sh $RELEASE_VERSION $DEV_VERSION
 
@@ -65,7 +66,7 @@ echo ""
 echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman-quickstarts!"
 read -p "Press enter when done." USER_INPUT
-
+popd
 
 
 
@@ -73,8 +74,9 @@ read -p "Press enter when done." USER_INPUT
 echo "---------------------------------------------------"
 echo " Release apiman"
 echo "---------------------------------------------------"
-cd ../apiman
-sed -i 's/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g' pom.xml
+pushd .
+cd apiman
+sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
 git add .
 git commit -m 'Updated apiman-quickstarts version to $RELEASE_VERSION'
 ./release.sh $RELEASE_VERSION $DEV_VERSION
@@ -84,14 +86,13 @@ echo ""
 echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman!"
 read -p "Press enter when done." USER_INPUT
-
+popd
 
 
 
 echo "---------------------------------------------------"
 echo " Upload apiman distro to jboss.org"
 echo "---------------------------------------------------"
-cd ..
 pushd .
 cd ~/tmp/apiman-releases
 echo "  Now connecting to jboss.org - please run these remote commands:"
@@ -106,12 +107,12 @@ popd
 
 
 
-cd apiman-plugins
 echo "---------------------------------------------------"
 echo " Release apiman-plugins"
-pwd
 echo "---------------------------------------------------"
-sed -i 's/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g' pom.xml
+pushd .
+cd apiman-plugins
+sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 git add .
 git commit -m 'Updated apiman version to $RELEASE_VERSION'
 ./release.sh $RELEASE_VERSION $DEV_VERSION
@@ -121,16 +122,20 @@ echo ""
 echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman-plugins!"
 read -p "Press enter when done." USER_INPUT
-
+popd
 
 
 
 echo "---------------------------------------------------"
 echo " Release apiman-manager-ui"
 echo "---------------------------------------------------"
-cd ../apiman-manager-ui
+pushd .
+cd apiman-manager-ui
 BOWER_VERSION=`echo "v$RELEASE_VERSION" | sed 's/.Final//g'`
 ./release.sh $RELEASE_VERSION $BOWER_VERSION
+popd
+
+
 
 
 echo ""
