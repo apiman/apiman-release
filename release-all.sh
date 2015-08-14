@@ -59,8 +59,8 @@ echo "---------------------------------------------------"
 echo " Release apiman-quickstarts"
 echo "---------------------------------------------------"
 pushd .
-echo cd apiman-quickstarts
-echo ./release.sh $RELEASE_VERSION $DEV_VERSION
+cd apiman-quickstarts
+./release.sh $RELEASE_VERSION $DEV_VERSION
 
 echo ""
 echo ""
