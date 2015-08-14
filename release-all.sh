@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "---------------------------------------------------"
-echo " Releasing apiman.  Many steps to follow.  Please
+echo " Releasing apiman.  Many steps to follow.  Please"
 echo " play along at home..."
 echo "---------------------------------------------------"
 echo ""
@@ -13,14 +13,13 @@ echo "---------------------------------------------------"
 echo ""
 rm -rf target
 mkdir target
-cd target
 
 echo "---------------------------------------------------"
-echo " Checking out required apiman git repos.
+echo " Checking out required apiman git repos."
 echo "---------------------------------------------------"
 echo ""
-mkdir git-repos
-cd git-repos
+mkdir target/git-repos
+cd target/git-repos
 git clone git@github.com:apiman/apiman-quickstarts.git
 git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
@@ -58,15 +57,14 @@ echo ""
 echo "---------------------------------------------------"
 echo " Release apiman-quickstarts"
 echo "---------------------------------------------------"
-cd apiman-quickstarts
-./release.sh $RELEASE_VERSION $DEV_VERSION
+echo cd apiman-quickstarts
+echo ./release.sh $RELEASE_VERSION $DEV_VERSION
 
 echo ""
 echo ""
-echo " ***** USER ACTION REQUIRED *****
+echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman-quickstarts!"
-echo "  (press enter when that is done)"
-read -p USER_INPUT
+read -p "Press enter when done." USER_INPUT
 
 
 
@@ -83,16 +81,15 @@ git commit -m 'Updated apiman-quickstarts version to $RELEASE_VERSION'
 
 echo ""
 echo ""
-echo " ***** USER ACTION REQUIRED *****
+echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman!"
-echo "  (press enter when that is done)"
-read -p USER_INPUT
+read -p "Press enter when done." USER_INPUT
 
 
 
 
 echo "---------------------------------------------------"
-echo " Upload apiman distro(s) to jboss.org"
+echo " Upload apiman distro to jboss.org"
 echo "---------------------------------------------------"
 cd ..
 pushd .
@@ -121,10 +118,9 @@ git commit -m 'Updated apiman version to $RELEASE_VERSION'
 
 echo ""
 echo ""
-echo " ***** USER ACTION REQUIRED *****
+echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman-plugins!"
-echo "  (press enter when that is done)"
-read -p USER_INPUT
+read -p "Press enter when done." USER_INPUT
 
 
 
@@ -140,7 +136,7 @@ BOWER_VERSION=`echo "v$RELEASE_VERSION" | sed 's/.Final//g'`
 echo ""
 echo ""
 echo "---------------------------------------------------"
-echo " ALL DONE!
+echo " ALL DONE!"
 echo ""
 echo " Remaining release tasks:"
 echo "   * Release a new Dockerfile"
