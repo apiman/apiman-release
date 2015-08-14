@@ -79,7 +79,7 @@ pushd .
 cd apiman
 sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
 git add .
-git commit -m 'Updated apiman-quickstarts version to $RELEASE_VERSION'
+git commit -m "Updated apiman-quickstarts version to $RELEASE_VERSION"
 ./release.sh $RELEASE_VERSION $DEV_VERSION
 
 echo ""
@@ -115,7 +115,7 @@ pushd .
 cd apiman-plugins
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 git add .
-git commit -m 'Updated apiman version to $RELEASE_VERSION'
+git commit -m "Updated apiman version to $RELEASE_VERSION"
 ./release.sh $RELEASE_VERSION $DEV_VERSION
 
 echo ""
