@@ -62,6 +62,7 @@ git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
 git clone git@github.com:apiman/apiman-manager-ui.git
 git clone git@github.com:apiman/apiman-guides.git
+git clone git@github.com:apiman/apiman-wildfly-docker.git
 
 
 echo "---------------------------------------------------"
@@ -150,6 +151,26 @@ BOWER_VERSION=`echo "v$RELEASE_VERSION" | sed 's/.Final//g'`
 popd
 
 
+echo "---------------------------------------------------"
+echo " Release apiman-wildfly-docker"
+echo "---------------------------------------------------"
+pushd .
+cd apiman-wildfly-docker
+git remote add upstream git@github.com:jboss-dockerfiles/apiman.git
+git checkout -b apiman-$RELEASE_VERSION
+cd apiman-wildfly
+sed -i "s/ENV.APIMAN_VERSION.*$/ENV APIMAN_VERSION $RELEASE_VERSION/g" Dockerfile
+git add . --all
+git commit -m "Released apiman $RELEASE_VERSION"
+git push origin apiman-$RELEASE_VERSION
+echo ""
+echo ""
+echo " ***** USER ACTION REQUIRED *****"
+echo "Please use github to submit a Pull Request!"
+echo "   https://github.com/apiman/apiman-wildfly-docker"
+echo ""
+read -p "Press enter when done." USER_INPUT
+popd
 
 
 echo ""
