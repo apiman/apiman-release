@@ -14,6 +14,7 @@ echo ""
 
 RELEASE_VERSION=$1
 DEV_VERSION=$2
+BRANCH=$3
 
 if [ "x$RELEASE_VERSION" = "x" ]
 then
@@ -25,9 +26,19 @@ then
   read -p "New Development Version: " DEV_VERSION
 fi
 
+if [ "x$BRANCH" = "x" ]
+then
+  read -p "Release Branch: [master] " BRANCH
+fi
+if [ "x$BRANCH" = "x" ]
+then
+  BRANCH=master
+fi
+
 echo "######################################"
 echo "Release Version: $RELEASE_VERSION"
 echo "Dev Version: $DEV_VERSION"
+echo "Release Branch: $BRANCH"
 echo "######################################"
 echo ""
 
@@ -53,13 +64,12 @@ git clone git@github.com:apiman/apiman-manager-ui.git
 git clone git@github.com:apiman/apiman-guides.git
 
 
-
-
 echo "---------------------------------------------------"
 echo " Release apiman-quickstarts"
 echo "---------------------------------------------------"
 pushd .
 cd apiman-quickstarts
+git checkout $BRANCH
 ./release.sh $RELEASE_VERSION $DEV_VERSION
 
 echo ""
@@ -77,6 +87,7 @@ echo " Release apiman"
 echo "---------------------------------------------------"
 pushd .
 cd apiman
+git checkout $BRANCH
 sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
 git add .
 git commit -m "Updated apiman-quickstarts version to $RELEASE_VERSION"
@@ -113,6 +124,7 @@ echo " Release apiman-plugins"
 echo "---------------------------------------------------"
 pushd .
 cd apiman-plugins
+git checkout $BRANCH
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 git add .
 git commit -m "Updated apiman version to $RELEASE_VERSION"
@@ -124,6 +136,7 @@ echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman-plugins!"
 read -p "Press enter when done." USER_INPUT
 popd
+
 
 
 
