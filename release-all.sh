@@ -57,12 +57,34 @@ echo "---------------------------------------------------"
 echo ""
 mkdir target/git-repos
 cd target/git-repos
+git clone git@github.com:apiman/apiman-plugin-registry.git
+git clone git@github.com:apiman/apiman-service-catalog.git
 git clone git@github.com:apiman/apiman-quickstarts.git
 git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
 git clone git@github.com:apiman/apiman-manager-ui.git
-git clone git@github.com:apiman/apiman-guides.git
 git clone git@github.com:apiman/apiman-wildfly-docker.git
+git clone git@github.com:apiman/apiman-deployer.git
+
+
+echo "---------------------------------------------------"
+echo " Release apiman-plugin-registry"
+echo "---------------------------------------------------"
+pushd .
+cd apiman-plugin-registry
+git checkout $BRANCH
+./release.sh $RELEASE_VERSION $DEV_VERSION
+popd
+
+
+echo "---------------------------------------------------"
+echo " Release apiman-service-catalog"
+echo "---------------------------------------------------"
+pushd .
+cd apiman-service-catalog
+git checkout $BRANCH
+./release.sh $RELEASE_VERSION $DEV_VERSION
+popd
 
 
 echo "---------------------------------------------------"
@@ -89,7 +111,11 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman
 git checkout $BRANCH
+
 sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-service-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+
 git add .
 git commit -m "Updated apiman-quickstarts version to $RELEASE_VERSION"
 ./release.sh $RELEASE_VERSION $DEV_VERSION
@@ -149,6 +175,18 @@ cd apiman-manager-ui
 BOWER_VERSION=`echo "v$RELEASE_VERSION" | sed 's/.Final//g'`
 ./release.sh $RELEASE_VERSION $BOWER_VERSION
 popd
+
+
+
+echo "---------------------------------------------------"
+echo " Release apiman-deployer script"
+echo "---------------------------------------------------"
+pushd .
+cd apiman-deployer
+git checkout $BRANCH
+./release.sh $RELEASE_VERSION $DEV_VERSION
+popd
+
 
 
 echo "---------------------------------------------------"
