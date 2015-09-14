@@ -113,8 +113,8 @@ cd apiman
 git checkout $BRANCH
 
 sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-service-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-service-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 
 git add .
 git commit -m "Updated apiman-quickstarts version to $RELEASE_VERSION"
@@ -125,6 +125,12 @@ echo ""
 echo " ***** USER ACTION REQUIRED *****"
 echo "Please use Nexus to release apiman!"
 read -p "Press enter when done." USER_INPUT
+
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-service-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+git add .
+git commit -m "Set plugin-registry and service-catalog URLs to dev versions."
+git push origin $BRANCH
 popd
 
 
