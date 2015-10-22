@@ -79,7 +79,7 @@ git clone git@github.com:apiman/apiman-deployer.git
 
 
 echo "---------------------------------------------------"
-echo " Update version #s and validate all builds
+echo " Update version #s and validate all builds"
 echo "---------------------------------------------------"
 rm -rf ~/.m2/repository/io/apiman
 pushd .
