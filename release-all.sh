@@ -150,7 +150,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" apiman-$RELEASE_VERSION
 git push origin apiman-$RELEASE_VERSION
 
-mvn clean deploy -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 rm -rf ~/.apiman
 mkdir ~/.apiman
@@ -203,7 +203,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
 git push origin apiman-plugins-$RELEASE_VERSION
 
-mvn clean deploy -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 mvn versions:set -DnewVersion=$DEV_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
