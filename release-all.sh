@@ -89,7 +89,7 @@ mvn versions:set -DnewVersion=$RELEASE_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
 mvn clean install
 popd
-push d.
+pushd .
 cd apiman-plugins
 git checkout $BRANCH
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
