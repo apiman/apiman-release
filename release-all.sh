@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -eu
+
+
 echo "---------------------------------------------------"
 echo " Releasing apiman.  Many steps to follow.  Please"
 echo " play along at home..."
@@ -15,6 +18,7 @@ echo ""
 RELEASE_VERSION=$1
 DEV_VERSION=$2
 BRANCH=$3
+GPG_PASSPHRASE=$4
 
 if [ "x$RELEASE_VERSION" = "x" ]
 then
@@ -35,6 +39,12 @@ then
   BRANCH=master
 fi
 
+if [ "x$GPG_PASSPHRASE" = "x" ]
+then
+  read -p "GPG Passphrase: " GPG_PASSPHRASE
+fi
+
+
 echo "######################################"
 echo "Release Version: $RELEASE_VERSION"
 echo "Dev Version: $DEV_VERSION"
@@ -51,6 +61,8 @@ echo ""
 rm -rf target
 mkdir target
 
+
+
 echo "---------------------------------------------------"
 echo " Checking out required apiman git repos."
 echo "---------------------------------------------------"
@@ -59,12 +71,33 @@ mkdir target/git-repos
 cd target/git-repos
 git clone git@github.com:apiman/apiman-plugin-registry.git
 git clone git@github.com:apiman/apiman-service-catalog.git
-git clone git@github.com:apiman/apiman-quickstarts.git
 git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
-git clone git@github.com:apiman/apiman-manager-ui.git
 git clone git@github.com:apiman/apiman-wildfly-docker.git
 git clone git@github.com:apiman/apiman-deployer.git
+
+
+
+echo "---------------------------------------------------"
+echo " Update version #s and validate all builds
+echo "---------------------------------------------------"
+rm -rf ~/.m2/repository/io/apiman
+pushd .
+cd apiman
+git checkout $BRANCH
+mvn versions:set -DnewVersion=$RELEASE_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
+mvn clean install
+popd
+push d.
+cd apiman-plugins
+git checkout $BRANCH
+sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+mvn versions:set -DnewVersion=$RELEASE_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
+mvn clean install
+popd
+
 
 
 echo "---------------------------------------------------"
@@ -73,8 +106,21 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-plugin-registry
 git checkout $BRANCH
-./release.sh $RELEASE_VERSION $DEV_VERSION
+sed -i -r "s/\"version\".?:.?\".*\"/\"version\" : \"$RELEASE_VERSION\"/g" registry.json
+
+git add .
+git commit -m "Prepare for release $RELEASE_VERSION"
+git push origin $BRANCH
+git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
+git push origin $RELEASE_VERSION
+
+sed -i -r "s/\"version\".?:.?\".*\"/\"version\" : \"$DEV_VERSION\"/g" registry.json
+git add .
+git commit -m "Update to next development version: $DEV_VERSION"
+git push origin $BRANCH
+
 popd
+
 
 
 echo "---------------------------------------------------"
@@ -83,25 +129,9 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-service-catalog
 git checkout $BRANCH
-./release.sh $RELEASE_VERSION $DEV_VERSION
+git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
+git push origin $RELEASE_VERSION
 popd
-
-
-echo "---------------------------------------------------"
-echo " Release apiman-quickstarts"
-echo "---------------------------------------------------"
-pushd .
-cd apiman-quickstarts
-git checkout $BRANCH
-./release.sh $RELEASE_VERSION $DEV_VERSION
-
-echo ""
-echo ""
-echo " ***** USER ACTION REQUIRED *****"
-echo "Please use Nexus to release apiman-quickstarts!"
-read -p "Press enter when done." USER_INPUT
-popd
-
 
 
 
@@ -110,21 +140,29 @@ echo " Release apiman"
 echo "---------------------------------------------------"
 pushd .
 cd apiman
-git checkout $BRANCH
 
-sed -i "s/<version.io.apiman.quickstarts>.*<\/version.io.apiman.quickstarts>/<version.io.apiman.quickstarts>$RELEASE_VERSION<\/version.io.apiman.quickstarts>/g" pom.xml
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-service-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-git add .
-git commit -m "Updated apiman-quickstarts version to $RELEASE_VERSION"
-./release.sh $RELEASE_VERSION $DEV_VERSION
+git add . --all
+git commit -m "Prepared apiman for release: $RELEASE_VERSION"
+git push origin $BRANCH
+git tag -a -m "Tagging release $RELEASE_VERSION" apiman-$RELEASE_VERSION
+git push origin apiman-$RELEASE_VERSION
 
-echo ""
-echo ""
-echo " ***** USER ACTION REQUIRED *****"
-echo "Please use Nexus to release apiman!"
-read -p "Press enter when done." USER_INPUT
+mvn clean deploy -Dgpg.passphrase=$GPG_PASSPHRASE
+
+rm -rf ~/.apiman
+mkdir ~/.apiman
+mkdir ~/.apiman/releases
+cp distro/wildfly8/target/*.zip ~/.apiman/releases
+cp distro/eap64/target/*.zip ~/.apiman/releases
+
+mvn versions:set -DnewVersion=$DEV_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
+git add .
+git commit -m "Update to next development version: $DEV_VERSION"
+git push origin $BRANCH
 
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-service-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
@@ -139,7 +177,7 @@ echo "---------------------------------------------------"
 echo " Upload apiman distro to jboss.org"
 echo "---------------------------------------------------"
 pushd .
-cd ~/tmp/apiman-releases
+cd ~/.apiman/releases
 echo "  Now connecting to jboss.org - please run these remote commands:"
 echo ""
 echo "mkdir $RELEASE_VERSION"
@@ -151,7 +189,6 @@ popd
 
 
 
-
 echo "---------------------------------------------------"
 echo " Release apiman-plugins"
 echo "---------------------------------------------------"
@@ -159,27 +196,20 @@ pushd .
 cd apiman-plugins
 git checkout $BRANCH
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+
+git add . --all
+git commit -m "Prepared apiman for release: $RELEASE_VERSION"
+git push origin $BRANCH
+git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
+git push origin apiman-plugins-$RELEASE_VERSION
+
+mvn clean deploy -Dgpg.passphrase=$GPG_PASSPHRASE
+
+mvn versions:set -DnewVersion=$DEV_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
 git add .
-git commit -m "Updated apiman version to $RELEASE_VERSION"
-./release.sh $RELEASE_VERSION $DEV_VERSION
-
-echo ""
-echo ""
-echo " ***** USER ACTION REQUIRED *****"
-echo "Please use Nexus to release apiman-plugins!"
-read -p "Press enter when done." USER_INPUT
-popd
-
-
-
-
-echo "---------------------------------------------------"
-echo " Release apiman-manager-ui"
-echo "---------------------------------------------------"
-pushd .
-cd apiman-manager-ui
-BOWER_VERSION=`echo "v$RELEASE_VERSION" | sed 's/.Final//g'`
-./release.sh $RELEASE_VERSION $BOWER_VERSION
+git commit -m "Update to next development version: $DEV_VERSION"
+git push origin $BRANCH
 popd
 
 
@@ -190,7 +220,20 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-deployer
 git checkout $BRANCH
-./release.sh $RELEASE_VERSION $DEV_VERSION
+
+sed -i "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$RELEASE_VERSION/g" deployer.sh
+
+git add .
+git commit -m "Prepare for release $RELEASE_VERSION"
+git push origin $BRANCH
+git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
+git push origin $RELEASE_VERSION
+
+sed -i "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$DEV_VERSION/g" deployer.sh
+git add .
+git commit -m "Update to next development version: $DEV_VERSION"
+git push origin $BRANCH
+
 popd
 
 
