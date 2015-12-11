@@ -70,7 +70,7 @@ echo ""
 mkdir target/git-repos
 cd target/git-repos
 git clone git@github.com:apiman/apiman-plugin-registry.git
-git clone git@github.com:apiman/apiman-service-catalog.git
+git clone git@github.com:apiman/apiman-api-catalog.git
 git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
 git clone git@github.com:apiman/apiman-wildfly-docker.git
@@ -124,10 +124,10 @@ popd
 
 
 echo "---------------------------------------------------"
-echo " Release apiman-service-catalog"
+echo " Release apiman-api-catalog"
 echo "---------------------------------------------------"
 pushd .
-cd apiman-service-catalog
+cd apiman-api-catalog
 git checkout $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
 git push origin $RELEASE_VERSION
@@ -142,7 +142,7 @@ pushd .
 cd apiman
 
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-service-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -165,9 +165,9 @@ git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.service-catalog.catalog-url=.*$/apiman-manager.service-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-service-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 git add .
-git commit -m "Set plugin-registry and service-catalog URLs to dev versions."
+git commit -m "Set plugin-registry and api-catalog URLs to dev versions."
 git push origin $BRANCH
 popd
 
