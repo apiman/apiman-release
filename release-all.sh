@@ -75,7 +75,7 @@ git clone git@github.com:apiman/apiman.git
 git clone git@github.com:apiman/apiman-plugins.git
 git clone git@github.com:apiman/apiman-wildfly-docker.git
 git clone git@github.com:apiman/apiman-deployer.git
-
+git clone git@github.com:apiman/apiman-quickstarts.git
 
 
 echo "---------------------------------------------------"
@@ -93,6 +93,13 @@ pushd .
 cd apiman-plugins
 git checkout $BRANCH
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+mvn versions:set -DnewVersion=$RELEASE_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
+mvn clean install
+popd
+pushd .
+cd apiman-quickstarts
+git checkout $BRANCH
 mvn versions:set -DnewVersion=$RELEASE_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
 mvn clean install
@@ -196,6 +203,30 @@ pushd .
 cd apiman-plugins
 git checkout $BRANCH
 sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+
+git add . --all
+git commit -m "Prepared apiman for release: $RELEASE_VERSION"
+git push origin $BRANCH
+git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
+git push origin apiman-plugins-$RELEASE_VERSION
+
+mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+
+mvn versions:set -DnewVersion=$DEV_VERSION
+find . -name '*.versionsBackup' -exec rm -f {} \;
+git add .
+git commit -m "Update to next development version: $DEV_VERSION"
+git push origin $BRANCH
+popd
+
+
+
+echo "---------------------------------------------------"
+echo " Release apiman-quickstarts"
+echo "---------------------------------------------------"
+pushd .
+cd apiman-quickstarts
+git checkout $BRANCH
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
