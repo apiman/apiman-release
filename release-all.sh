@@ -150,6 +150,8 @@ cd apiman
 
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -163,6 +165,7 @@ rm -rf ~/.apiman
 mkdir ~/.apiman
 mkdir ~/.apiman/releases
 cp distro/wildfly8/target/*.zip ~/.apiman/releases
+cp distro/wildfly9/target/*.zip ~/.apiman/releases
 cp distro/eap64/target/*.zip ~/.apiman/releases
 
 mvn versions:set -DnewVersion=$DEV_VERSION
@@ -173,6 +176,9 @@ git push origin $BRANCH
 
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+
 git add .
 git commit -m "Set plugin-registry and api-catalog URLs to dev versions."
 git push origin $BRANCH
@@ -189,8 +195,10 @@ echo "  Now connecting to jboss.org - please run these remote commands:"
 echo ""
 echo "mkdir $RELEASE_VERSION"
 echo "cd $RELEASE_VERSION"
+echo "put apiman-distro-wildfly9-$RELEASE_VERSION-overlay.zip"
 echo "put apiman-distro-wildfly8-$RELEASE_VERSION-overlay.zip"
 echo "put apiman-distro-eap64-$RELEASE_VERSION-overlay.zip"
+echo ""
 sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman
 popd
 
