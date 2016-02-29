@@ -164,9 +164,10 @@ mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 rm -rf ~/.apiman
 mkdir ~/.apiman
 mkdir ~/.apiman/releases
-cp distro/wildfly8/target/*.zip ~/.apiman/releases
 cp distro/wildfly9/target/*.zip ~/.apiman/releases
-cp distro/eap64/target/*.zip ~/.apiman/releases
+cp distro/wildfly10/target/*.zip ~/.apiman/releases
+cp distro/eap7/target/*.zip ~/.apiman/releases
+cp distro/tomcat8/target/*.zip ~/.apiman/releases
 
 mvn versions:set -DnewVersion=$DEV_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
@@ -178,6 +179,8 @@ sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registrie
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/standalone/configuration/apiman.properties
 
 git add .
 git commit -m "Set plugin-registry and api-catalog URLs to dev versions."
@@ -196,8 +199,9 @@ echo ""
 echo "mkdir $RELEASE_VERSION"
 echo "cd $RELEASE_VERSION"
 echo "put apiman-distro-wildfly9-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-wildfly8-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-eap64-$RELEASE_VERSION-overlay.zip"
+echo "put apiman-distro-wildfly10-$RELEASE_VERSION-overlay.zip"
+echo "put apiman-distro-eap7-$RELEASE_VERSION-overlay.zip"
+echo "put apiman-distro-tomcat8-$RELEASE_VERSION-overlay.zip"
 echo ""
 sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman
 popd
@@ -273,29 +277,6 @@ git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 
-popd
-
-
-
-echo "---------------------------------------------------"
-echo " Release apiman-wildfly-docker"
-echo "---------------------------------------------------"
-pushd .
-cd apiman-wildfly-docker
-git remote add upstream git@github.com:jboss-dockerfiles/apiman.git
-git checkout -b apiman-$RELEASE_VERSION
-cd apiman-wildfly
-sed -i "s/ENV.APIMAN_VERSION.*$/ENV APIMAN_VERSION $RELEASE_VERSION/g" Dockerfile
-git add . --all
-git commit -m "Released apiman $RELEASE_VERSION"
-git push origin apiman-$RELEASE_VERSION
-echo ""
-echo ""
-echo " ***** USER ACTION REQUIRED *****"
-echo "Please use github to submit a Pull Request!"
-echo "   https://github.com/apiman/apiman-wildfly-docker"
-echo ""
-read -p "Press enter when done." USER_INPUT
 popd
 
 
