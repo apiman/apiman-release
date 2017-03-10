@@ -148,13 +148,18 @@ git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 popd
 
+
 echo "---------------------------------------------------"
 echo " Updating Project Web Site"
 echo "---------------------------------------------------"
 pushd .
 cd www.designer.org
 sed -i "s/version:.*/version: $RELEASE_VERSION/g" _config.yml
+git add .
+git commit -m 'Updating version info due to release of version $RELEASE_VERSION.'
+git push origin gh-pages
 popd
+
 
 echo ""
 echo ""
