@@ -67,6 +67,7 @@ pushd .
 cd oai-ts-core
 git checkout $BRANCH
 sed -i "s/version.:.*/version\": \"$RELEASE_VERSION\",/g" package.json
+yarn install
 yarn test
 git add package.json
 git commit -m "Prepare for release $RELEASE_VERSION"
