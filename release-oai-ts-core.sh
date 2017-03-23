@@ -81,8 +81,9 @@ echo "---------------------------------------------------"
 echo " Create and release the package."
 echo "---------------------------------------------------"
 pushd .
+cd oai-ts-core
 yarn run package
-yarn publish ./dist
+npm publish ./dist
 popd
 
 
