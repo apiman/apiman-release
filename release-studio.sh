@@ -103,6 +103,7 @@ mkdir -p target/git-repos
 cd target/git-repos
 git clone -b gh-pages git@github.com:apiman/apiman-studio.git www.designer.org
 git clone git@github.com:apiman/apiman-studio.git
+git clone ssh://58dcf5510c1e66fa6500017e@release-apistudio.rhcloud.com/~/git/release.git/ apistudio-release
 
 
 echo "---------------------------------------------------"
@@ -158,6 +159,21 @@ sed -i "s/version:.*/version: $RELEASE_VERSION/g" _config.yml
 git add .
 git commit -m 'Updating version info due to release of version $RELEASE_VERSION.'
 git push origin gh-pages
+popd
+
+
+echo "---------------------------------------------------"
+echo " Pushing to OpenShift (release)"
+echo "---------------------------------------------------"
+pushd .
+cd apistudio-release
+git rm -rf diy/apache*
+cp ../apiman-studio/releases/api-design-studio-$RELEASE_VERSION-quickstart.zip ./diy
+cd diy
+unzip api-design-studio-$RELEASE_VERSION-quickstart.zip
+git add . --all
+git commit -m "Pushing release $RELEASE_VERSION to OpenShift Origin"
+git push origin master
 popd
 
 
