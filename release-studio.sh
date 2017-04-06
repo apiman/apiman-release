@@ -168,7 +168,8 @@ echo "---------------------------------------------------"
 pushd .
 cd apistudio-release
 git rm -rf diy/apache*
-cp ../apiman-studio/releases/api-design-studio-$RELEASE_VERSION-quickstart.zip ./diy
+mkdir -p diy
+cp ../apiman-studio/releases/api-design-studio-$RELEASE_VERSION-quickstart.zip ./diy/api-design-studio-$RELEASE_VERSION-quickstart.zip
 cd diy
 unzip api-design-studio-$RELEASE_VERSION-quickstart.zip
 git add . --all
