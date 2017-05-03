@@ -170,6 +170,7 @@ cp distro/wildfly9/target/*.zip ~/.apiman/releases
 cp distro/wildfly10/target/*.zip ~/.apiman/releases
 cp distro/eap7/target/*.zip ~/.apiman/releases
 cp distro/tomcat8/target/*.zip ~/.apiman/releases
+cp distro/vertx/target/*.zip ~/.apiman/releases
 
 mvn versions:set -DnewVersion=$DEV_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
@@ -204,6 +205,7 @@ echo "put apiman-distro-wildfly9-$RELEASE_VERSION-overlay.zip"
 echo "put apiman-distro-wildfly10-$RELEASE_VERSION-overlay.zip"
 echo "put apiman-distro-eap7-$RELEASE_VERSION-overlay.zip"
 echo "put apiman-distro-tomcat8-$RELEASE_VERSION-overlay.zip"
+echo "put apiman-distro-vertx-$RELEASE_VERSION.zip"
 echo ""
 sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman
 popd
