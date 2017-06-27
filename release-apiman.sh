@@ -1,7 +1,5 @@
 #!/bin/sh
-
-set -e
-
+set -e -o pipefail
 
 echo "---------------------------------------------------"
 echo " Releasing apiman.  Many steps to follow.  Please"
@@ -41,7 +39,7 @@ fi
 
 if [ "x$GPG_PASSPHRASE" = "x" ]
 then
-  read -p "GPG Passphrase: " GPG_PASSPHRASE
+  read -s -p "GPG Passphrase: " GPG_PASSPHRASE
 fi
 
 
@@ -148,10 +146,9 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 
@@ -161,12 +158,12 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" apiman-$RELEASE_VERSION
 git push origin apiman-$RELEASE_VERSION
 
-mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn clean install
+mvn deploy -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 rm -rf ~/.apiman
 mkdir ~/.apiman
 mkdir ~/.apiman/releases
-cp distro/wildfly9/target/*.zip ~/.apiman/releases
 cp distro/wildfly10/target/*.zip ~/.apiman/releases
 cp distro/eap7/target/*.zip ~/.apiman/releases
 cp distro/tomcat8/target/*.zip ~/.apiman/releases
@@ -178,12 +175,12 @@ git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly8/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly9/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+
 sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=http:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=http:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+
 
 git add .
 git commit -m "Set plugin-registry and api-catalog URLs to dev versions."
@@ -197,17 +194,16 @@ echo " Upload apiman distro to jboss.org"
 echo "---------------------------------------------------"
 pushd .
 cd ~/.apiman/releases
-echo "  Now connecting to jboss.org - please run these remote commands:"
+echo "Now connecting to jboss.org:"
 echo ""
-echo "mkdir $RELEASE_VERSION"
-echo "cd $RELEASE_VERSION"
-echo "put apiman-distro-wildfly9-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-wildfly10-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-eap7-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-tomcat8-$RELEASE_VERSION-overlay.zip"
-echo "put apiman-distro-vertx-$RELEASE_VERSION.zip"
-echo ""
-sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman
+sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman <<EOF
+  mkdir $RELEASE_VERSION
+  cd $RELEASE_VERSION
+  put apiman-distro-wildfly10-$RELEASE_VERSION-overlay.zip
+  put apiman-distro-eap7-$RELEASE_VERSION-overlay.zip
+  put apiman-distro-tomcat8-$RELEASE_VERSION-overlay.zip
+  put apiman-distro-vertx-$RELEASE_VERSION.zip
+EOF
 popd
 
 
@@ -226,7 +222,8 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
 git push origin apiman-plugins-$RELEASE_VERSION
 
-mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn clean install
+mvn deploy -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 mvn versions:set -DnewVersion=$DEV_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
@@ -237,27 +234,27 @@ popd
 
 
 
-echo "---------------------------------------------------"
-echo " Release apiman-quickstarts"
-echo "---------------------------------------------------"
-pushd .
-cd apiman-quickstarts
-git checkout $BRANCH
-
-git add . --all
-git commit -m "Prepared apiman for release: $RELEASE_VERSION"
-git push origin $BRANCH
-git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
-git push origin apiman-plugins-$RELEASE_VERSION
-
-mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
-
-mvn versions:set -DnewVersion=$DEV_VERSION
-find . -name '*.versionsBackup' -exec rm -f {} \;
-git add .
-git commit -m "Update to next development version: $DEV_VERSION"
-git push origin $BRANCH
-popd
+# echo "---------------------------------------------------"
+# echo " Release apiman-quickstarts"
+# echo "---------------------------------------------------"
+# pushd .
+# cd apiman-quickstarts
+# git checkout $BRANCH
+#
+# git add . --all
+# git commit -m "Prepared apiman for release: $RELEASE_VERSION"
+# git push origin $BRANCH
+# git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
+# git push origin apiman-plugins-$RELEASE_VERSION
+#
+# mvn clean deploy -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+#
+# mvn versions:set -DnewVersion=$DEV_VERSION
+# find . -name '*.versionsBackup' -exec rm -f {} \;
+# git add .
+# git commit -m "Update to next development version: $DEV_VERSION"
+# git push origin $BRANCH
+# popd
 
 
 
