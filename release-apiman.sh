@@ -17,6 +17,20 @@ RELEASE_VERSION=$1
 DEV_VERSION=$2
 BRANCH=$3
 GPG_PASSPHRASE=$4
+SED="sed"
+
+if [[ "$OSTYPE" == "darwin"* ]];
+then
+    SED="gsed"
+
+    if [[ -x "gsed" ]];
+    then
+        echo "Install gsed: brew install gsed"
+        exit -1;
+    fi
+fi
+
+echo "Using sed: $SED"
 
 if [ "x$RELEASE_VERSION" = "x" ]
 then
@@ -90,7 +104,7 @@ popd
 pushd .
 cd apiman-plugins
 git checkout $BRANCH
-sed -i '' "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+$SED -i  "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 mvn versions:set -DnewVersion=$RELEASE_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
 mvn clean install
@@ -111,7 +125,7 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-plugin-registry
 git checkout $BRANCH
-sed -i '' -r "s/\"version\".?:.?\".*\"/\"version\" : \"$RELEASE_VERSION\"/g" registry.json
+$SED -i  -r "s/\"version\".?:.?\".*\"/\"version\" : \"$RELEASE_VERSION\"/g" registry.json
 
 git add .
 git commit -m "Prepare for release $RELEASE_VERSION"
@@ -119,7 +133,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
 git push origin $RELEASE_VERSION
 
-sed -i '' -r "s/\"version\".?:.?\".*\"/\"version\" : \"$DEV_VERSION\"/g" registry.json
+$SED -i  -r "s/\"version\".?:.?\".*\"/\"version\" : \"$DEV_VERSION\"/g" registry.json
 git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
@@ -146,14 +160,14 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -179,14 +193,14 @@ git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
-sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+$SED -i  "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+$SED -i  "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 
 
 git add .
@@ -222,7 +236,7 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-plugins
 git checkout $BRANCH
-sed -i '' "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+$SED -i  "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -273,7 +287,7 @@ pushd .
 cd apiman-deployer
 git checkout $BRANCH
 
-sed -i '' "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$RELEASE_VERSION/g" deployer.sh
+$SED -i  "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$RELEASE_VERSION/g" deployer.sh
 
 git add .
 git commit -m "Prepare for release $RELEASE_VERSION"
@@ -281,7 +295,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
 git push origin $RELEASE_VERSION
 
-sed -i '' "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$DEV_VERSION/g" deployer.sh
+$SED -i  "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$DEV_VERSION/g" deployer.sh
 git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
