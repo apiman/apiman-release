@@ -18,7 +18,9 @@ DEV_VERSION=$2
 BRANCH=$3
 GPG_PASSPHRASE=$4
 SED="sed"
+export MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xmx4094M"
 
+# If using macOS then look for gsed
 if [[ "$OSTYPE" == "darwin"* ]];
 then
     SED="gsed"
@@ -176,7 +178,7 @@ git tag -a -m "Tagging release $RELEASE_VERSION" apiman-$RELEASE_VERSION
 git push origin apiman-$RELEASE_VERSION
 
 mvn clean install
-mvn deploy -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn deploy -DskipTests -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 rm -rf ~/.apiman
 mkdir ~/.apiman
@@ -245,7 +247,7 @@ git tag -a -m "Tagging release $RELEASE_VERSION" apiman-plugins-$RELEASE_VERSION
 git push origin apiman-plugins-$RELEASE_VERSION
 
 mvn clean install
-mvn deploy -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
+mvn deploy -DskipTests -T2C -Prelease -Dgpg.passphrase=$GPG_PASSPHRASE
 
 mvn versions:set -DnewVersion=$DEV_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
