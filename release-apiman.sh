@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e -o pipefail
+set -e -o pipefail -x
 
 echo "---------------------------------------------------"
 echo " Releasing apiman.  Many steps to follow.  Please"
@@ -90,7 +90,7 @@ popd
 pushd .
 cd apiman-plugins
 git checkout $BRANCH
-sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+sed -i '' "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 mvn versions:set -DnewVersion=$RELEASE_VERSION
 find . -name '*.versionsBackup' -exec rm -f {} \;
 mvn clean install
@@ -111,7 +111,7 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-plugin-registry
 git checkout $BRANCH
-sed -i -r "s/\"version\".?:.?\".*\"/\"version\" : \"$RELEASE_VERSION\"/g" registry.json
+sed -i '' -r "s/\"version\".?:.?\".*\"/\"version\" : \"$RELEASE_VERSION\"/g" registry.json
 
 git add .
 git commit -m "Prepare for release $RELEASE_VERSION"
@@ -119,7 +119,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
 git push origin $RELEASE_VERSION
 
-sed -i -r "s/\"version\".?:.?\".*\"/\"version\" : \"$DEV_VERSION\"/g" registry.json
+sed -i '' -r "s/\"version\".?:.?\".*\"/\"version\" : \"$DEV_VERSION\"/g" registry.json
 git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
@@ -146,11 +146,14 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/cdn.rawgit.com\/apiman\/apiman-plugin-registry\/$RELEASE_VERSION\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/cdn.rawgit.com\/apiman\/apiman-api-catalog\/$RELEASE_VERSION\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -165,6 +168,7 @@ rm -rf ~/.apiman
 mkdir ~/.apiman
 mkdir ~/.apiman/releases
 cp distro/wildfly10/target/*.zip ~/.apiman/releases
+cp distro/wildfly11/target/*.zip ~/.apiman/releases
 cp distro/eap7/target/*.zip ~/.apiman/releases
 cp distro/tomcat8/target/*.zip ~/.apiman/releases
 cp distro/vertx/target/*.zip ~/.apiman/releases
@@ -175,11 +179,14 @@ git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly10/src/main/resources/overlay/standalone/configuration/apiman.properties
 
-sed -i "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
-sed -i "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/wildfly11/src/main/resources/overlay/standalone/configuration/apiman.properties
+
+sed -i '' "s/apiman-manager.plugins.registries=.*$/apiman-manager.plugins.registries=https:\/\/rawgit.com\/apiman\/apiman-plugin-registry\/$BRANCH\/registry.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
+sed -i '' "s/apiman-manager.api-catalog.catalog-url=.*$/apiman-manager.api-catalog.catalog-url=https:\/\/rawgit.com\/apiman\/apiman-api-catalog\/$BRANCH\/catalog.json/g" distro/tomcat8/src/main/resources/overlay/conf/apiman.properties
 
 
 git add .
@@ -200,6 +207,7 @@ sftp overlord@filemgmt.jboss.org:downloads_htdocs/overlord/apiman <<EOF
   mkdir $RELEASE_VERSION
   cd $RELEASE_VERSION
   put apiman-distro-wildfly10-$RELEASE_VERSION-overlay.zip
+  put apiman-distro-wildfly11-$RELEASE_VERSION-overlay.zip
   put apiman-distro-eap7-$RELEASE_VERSION-overlay.zip
   put apiman-distro-tomcat8-$RELEASE_VERSION-overlay.zip
   put apiman-distro-vertx-$RELEASE_VERSION.zip
@@ -214,7 +222,7 @@ echo "---------------------------------------------------"
 pushd .
 cd apiman-plugins
 git checkout $BRANCH
-sed -i "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
+sed -i '' "s/<version.apiman>.*<\/version.apiman>/<version.apiman>$RELEASE_VERSION<\/version.apiman>/g" pom.xml
 
 git add . --all
 git commit -m "Prepared apiman for release: $RELEASE_VERSION"
@@ -265,7 +273,7 @@ pushd .
 cd apiman-deployer
 git checkout $BRANCH
 
-sed -i "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$RELEASE_VERSION/g" deployer.sh
+sed -i '' "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$RELEASE_VERSION/g" deployer.sh
 
 git add .
 git commit -m "Prepare for release $RELEASE_VERSION"
@@ -273,7 +281,7 @@ git push origin $BRANCH
 git tag -a -m "Tagging release $RELEASE_VERSION" $RELEASE_VERSION
 git push origin $RELEASE_VERSION
 
-sed -i "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$DEV_VERSION/g" deployer.sh
+sed -i '' "s/APIMAN_VERSION=.*$/APIMAN_VERSION=$DEV_VERSION/g" deployer.sh
 git add .
 git commit -m "Update to next development version: $DEV_VERSION"
 git push origin $BRANCH
